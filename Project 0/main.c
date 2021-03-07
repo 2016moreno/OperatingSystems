@@ -141,12 +141,9 @@ int main(int argc, char **argv)
 
       switch ((*argv)[1]) {
         /* C2: -fFILENAME switch: open FILENAME and set it as the output stream */
-          case 'f':
-		        if ((output = fopen(*argv + 2, "w")) == NULL) {
-		          fprintf(stderr, "failed open \"%s\".\n", *argv + 2);
-    		      free(entries);
-		          return EXIT_FAILURE;
-		          }
+        case 'f':
+		      freopen(&(*argv)[2],"w",stdout);
+          break;
 
         /* B3: fix the logical flow error in the switch*/
         case 'h':
