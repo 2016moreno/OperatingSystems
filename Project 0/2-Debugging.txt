@@ -33,5 +33,6 @@ Bug hunting
   5) Fix print_result() to print results correctly and in the same order
      as the words were specified on the command line.  Explain your solution.
 
-   Used fprintf and stdout to make sure that results were going to the right place.
+   Used fprintf and stdout to make sure that results were going to the right place. Also used <=
+   to make sure that we were reading every argument and not leaving one out.
 
