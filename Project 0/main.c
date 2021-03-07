@@ -51,7 +51,7 @@ int process_stream(WordCountEntry entries[], int entry_count)
        tab), as well as the newline character '\n'.  We could also
        trim the buffer to get rid of the newline, instead. 
        strtok returns NULL when no more tokens are available. */
-       char* tempword = strtok(buffer, '\n');
+       char* tempword = strtok(buffer, " ,.-");
        while(tempword != NULL){
 
     /* Compare against each entry. 
@@ -64,7 +64,7 @@ int process_stream(WordCountEntry entries[], int entry_count)
         i++;
       }
 
-      tempword = strtok(NULL, '\n');
+      tempword = strtok(NULL, " ,.-");
     }
     line_count++;
   }
@@ -83,7 +83,7 @@ void print_result(WordCountEntry entries[], int entry_count)
 
     /* B5: fix this*/
 
-    for(i; i< entry_count; i++){
+    for(; i< entry_count; i++){
         printf("%s:%d\n", entries[i].word, entries[i].counter);
     }
     // while (entry_count-- > 0) {
@@ -122,6 +122,8 @@ int main(int argc, char **argv)
 
  /* B4: fix argv */
 
+ argv++;
+
   while (*argv != NULL) {
     if (**argv == '-') {
 
@@ -139,7 +141,7 @@ int main(int argc, char **argv)
       }
     } else {
       /* C3: the LENGTH macro will not work anymore, since entries will be a pointer, not an array */
-      if (entryCount < argv - 1) {
+      if (entryCount < LENGTH(&entries)) {
         entries[entryCount].word = *argv;
         entries[entryCount++].counter = 0;
       }
@@ -163,6 +165,7 @@ int main(int argc, char **argv)
   print_result(entries, entryCount);
 
   // FREE MEMORY, CLOSE FILES, STREAMS, etc.
+
 
   return EXIT_SUCCESS;
 }
