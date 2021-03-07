@@ -52,8 +52,8 @@ int process_stream(WordCountEntry entries[], int entry_count)
        tab), as well as the newline character '\n'.  We could also
        trim the buffer to get rid of the newline, instead. 
        strtok returns NULL when no more tokens are available. */
-       char* tempword = strtok(buffer, "\t\n");
-       while(tempword != NULL){
+       char *word = strtok(buffer, "\t\n");
+       while(word != NULL){
 
     /* Compare against each entry. 
     When you implement C5, you won't be able to process the entries directly from the buffer,
@@ -65,7 +65,7 @@ int process_stream(WordCountEntry entries[], int entry_count)
         i++;
       }
 
-      tempword = strtok(NULL, "\t\n");
+      word = strtok(NULL, "\t\n");
     }
     line_count++;
   }
@@ -73,19 +73,19 @@ int process_stream(WordCountEntry entries[], int entry_count)
 }
 
 
-void print_result(WordCountEntry entries[], int entry_count)
+void print_result(WordCountEntry entries[], int entry_count, FILE* output)
 {
     /* B5: introduce a temporary variable i and use it to count up from 0 */
 
     int i = 0;
 
     /* C2: send output to the right stream, use fprintf */
-    printf("Result:\n");
+    fprintf(output, "\n");
 
     /* B5: fix this*/
 
     for(; i< entry_count; i++){
-        printf("%s:%d\n", entries[i].word, entries[i].counter);
+        fprintf(output, "%s:%d\n", entries[i].word, entries[i].counter);
     }
     // while (entry_count-- > 0) {
     //     printf("%s:%d\n", entries->word, entries->counter);
@@ -96,7 +96,7 @@ void print_result(WordCountEntry entries[], int entry_count)
 void printHelp(const char *name)
 {
     /* C2: send output to the right stream, use fprintf */
-    fprintf(stderr, "usage: %s [-h] [-fFILENAME] <word1> ... <wordN>\n");
+    fprintf(stderr, "usage: %s [-h] [-fFILENAME] <word1> ... <wordN>\n", name);
 }
 
 
@@ -139,8 +139,7 @@ int main(int argc, char **argv)
           printHelp(prog_name);
           break;
         default:
-          printf("%s: Invalid option %s. Use -h for help.\n",
-                 prog_name, *argv);
+          printf("%s: Invalid option %s. Use -h for help.\n", prog_name, *argv);
       }
     } else {
       /* C3: the LENGTH macro will not work anymore, since entries will be a pointer, not an array */
@@ -159,16 +158,17 @@ int main(int argc, char **argv)
 
   /* C2: send output to the right stream */
   if (entryCount == 1) {
-    printf("Looking for a single word\n");
+    fprintf(output, "Looking for a single word\n");
   } else {
-    printf("Looking for %d words\n", entryCount);
+    fprintf(output, "Looking for %d words\n", entryCount);
   }
 
   process_stream(entries, entryCount);
-  print_result(entries, entryCount);
+  print_result(entries, entryCount, output);
 
   // FREE MEMORY, CLOSE FILES, STREAMS, etc.
 
+  free(entries);
 
   return EXIT_SUCCESS;
 }
