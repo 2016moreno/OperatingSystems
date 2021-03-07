@@ -52,20 +52,21 @@ int process_stream(WordCountEntry entries[], int entry_count)
        tab), as well as the newline character '\n'.  We could also
        trim the buffer to get rid of the newline, instead. 
        strtok returns NULL when no more tokens are available. */
-       char *word = strtok(buffer, "\t\n");
-       while(word != NULL){
+       char *word = strtok(buffer, " \t\n");
+       
 
     /* Compare against each entry. 
     When you implement C5, you won't be able to process the entries directly from the buffer,
     but rather from returned value of strtok. Call "man strtok" in your command line to learn more about strtok*/
+    while(word != NULL){
       int i = 0;
       while (i < entry_count) {
-        if (!strcmp(entries[i].word, buffer))
+        if (!strcmp(entries[i].word, word))
           entries[i].counter++;
         i++;
       }
 
-      word = strtok(NULL, "\t\n");
+      word = strtok(NULL, " \t\n");
     }
     line_count++;
   }
@@ -84,9 +85,10 @@ void print_result(WordCountEntry entries[], int entry_count, FILE* output)
 
     /* B5: fix this*/
 
-    for(; i< entry_count; i++){
+    while(i< entry_count){
         fprintf(output, "%s:%d\n", entries[i].word, entries[i].counter);
     }
+    i++;
     // while (entry_count-- > 0) {
     //     printf("%s:%d\n", entries->word, entries->counter);
     // }
@@ -96,7 +98,7 @@ void print_result(WordCountEntry entries[], int entry_count, FILE* output)
 void printHelp(const char *name)
 {
     /* C2: send output to the right stream, use fprintf */
-    fprintf(stderr, "usage: %s [-h] [-fFILENAME] <word1> ... <wordN>\n", name);
+    fprintf(stderr, "usage: %s [-h] [-f FILENAME]<word1>...<wordN>\n", name);
 }
 
 
@@ -122,6 +124,13 @@ int main(int argc, char **argv)
 
   /* C3: allocate (potentially) a little more memory than strictly
        necessary, thus avoiding extensive modifications to the code below. Hint: use malloc */
+
+       if ((entries = malloc(sizeof(WordCountEntry) * (argc - 1))) == NULL){
+
+	      fprintf(stderr, "failed\n");
+	      return EXIT_FAILURE;
+    }
+
   
  /* B4: fix argv */
 
@@ -131,8 +140,13 @@ int main(int argc, char **argv)
     if (**argv == '-') {
 
       switch ((*argv)[1]) {
-        /* C2: -fFILENAME switch: open FILENAME and set it as the output
-             stream */
+        /* C2: -fFILENAME switch: open FILENAME and set it as the output stream */
+          case 'f':
+		        if ((output = fopen(*argv + 2, "w")) == NULL) {
+		          fprintf(stderr, "failed open \"%s\".\n", *argv + 2);
+    		      free(entries);
+		          return EXIT_FAILURE;
+		          }
 
         /* B3: fix the logical flow error in the switch*/
         case 'h':
@@ -143,7 +157,7 @@ int main(int argc, char **argv)
       }
     } else {
       /* C3: the LENGTH macro will not work anymore, since entries will be a pointer, not an array */
-      if (entryCount < LENGTH(&entries)) {
+      if (entryCount < argc - 1) {
         entries[entryCount].word = *argv;
         entries[entryCount++].counter = 0;
       }
