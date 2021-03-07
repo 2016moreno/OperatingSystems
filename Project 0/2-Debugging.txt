@@ -12,14 +12,26 @@ Understanding the code
      Would it work with a pointer to a dynamically allocated array? (Hint:
      understand sizeof).
 
+     sizeof() is a function that is used to calculate the size of its operand. So 
+     sizeof(*s) is the length of the first element in the array in bytes, and since the 
+     operation is (sizeof(s)/sizeof(*s)), it'll give back the number of elements in the array.
+
+     and no.
+
 Bug hunting
 
   3) Explain and fix the logical flow bug within the switch statement.
      (What happens when the -h option is used?)
 
+     No break used in case h. 
+
   4) Explain and fix the argument parsing error. (Why is entrycount never
      zero?)
 
+     entrycount is always incremented at least once by default. 
+
   5) Fix print_result() to print results correctly and in the same order
      as the words were specified on the command line.  Explain your solution.
+
+     Needed to fix the loop with <= because it was not getting the last argument provided.
 
