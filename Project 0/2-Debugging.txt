@@ -33,5 +33,6 @@ Bug hunting
   5) Fix print_result() to print results correctly and in the same order
      as the words were specified on the command line.  Explain your solution.
 
-     Needed to fix the loop with <= because it was not getting the last argument provided.
+     Had to make sure that it was reading from word1 to word inf. Also added
+     -h to know that user was going to type a word and -f for the file name.
 
