@@ -74,19 +74,19 @@ int process_stream(WordCountEntry entries[], int entry_count)
 }
 
 
-void print_result(WordCountEntry entries[], int entry_count, FILE* output)
+void print_result(WordCountEntry entries[], int entry_count)
 {
     /* B5: introduce a temporary variable i and use it to count up from 0 */
 
     int i = 0;
 
     /* C2: send output to the right stream, use fprintf */
-    fprintf(output, "\n");
+    fprintf(stdout, "Result:\n");
 
     /* B5: fix this*/
 
     while(i< entry_count){
-        fprintf(output, "%s:%d\n", entries[i].word, entries[i].counter);
+        fprintf("%s:%d\n", entries[i].word, entries[i].counter);
     }
     i++;
     // while (entry_count-- > 0) {
@@ -178,7 +178,7 @@ int main(int argc, char **argv)
   }
 
   process_stream(entries, entryCount);
-  print_result(entries, entryCount, output);
+  print_result(entries, entryCount);
 
   // FREE MEMORY, CLOSE FILES, STREAMS, etc.
 
