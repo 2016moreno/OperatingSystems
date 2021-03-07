@@ -84,7 +84,7 @@ void print_result(WordCountEntry entries[], int entry_count)
 
     /* B5: fix this*/
 
-    while(i< entry_count){
+    while(i <= entry_count){
         printf("%s:%d\n", entries[i].word, entries[i].counter);
          i++;
     }
@@ -124,6 +124,12 @@ int main(int argc, char **argv)
 
   /* C3: allocate (potentially) a little more memory than strictly
        necessary, thus avoiding extensive modifications to the code below. Hint: use malloc */
+
+       if ((entries = malloc(sizeof(WordCountEntry) * (argc - 1))) == NULL){
+
+	      fprintf(stderr, "\n");
+	      return EXIT_FAILURE;
+    }
 
   
  /* B4: fix argv */
@@ -174,6 +180,11 @@ int main(int argc, char **argv)
   // FREE MEMORY, CLOSE FILES, STREAMS, etc.
 
   free(entries);
+
+  if (output != stdout){
+
+	fclose(output);
+  }
 
   return EXIT_SUCCESS;
 }
