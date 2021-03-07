@@ -1,3 +1,3 @@
 # OperatingSystems
 
-Used for 2021 Operating Syetems Class
+Used for 2021 Operating Systems Class
