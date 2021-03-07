@@ -1,0 +1,99 @@
+Pointers in C
+-------------
+
+1) Consider the following C program.
+#include <string.h>
+int main(int argc, char *argv[])
+{
+  char *temp;
+  strcpy(temp, argv[0]);
+  return 0;
+}
+
+Why is the above code incorrect (i.e., likely to crash)?
+
+Since the code has a temp pointer that is not pointed to any allocated space in memory, it is likely to crash at run time. 
+
+2) Consider the following C program.
+#include <string.h>
+int main(int argc, char *argv[])
+{
+  char temp[9];
+  strcpy(temp, argv[0]);
+  return 0;
+}
+
+A buffer overflow occurs when the program name is 9 characters long
+(e.g., "12345.exe"). Why?
+
+Since the size of char is one, you can only have char temp be from 0-9, 
+and since the name is 9 characters long with the null element '\0' going into the 10th, 
+it goes into the double digits which will cause a buffer overflow. 
+
+3) Consider the following C program.
+#include <string.h>
+int main(int argc, char *argv[])
+{
+  char *buffer = "Hello";
+  strcpy(buffer, "World");
+  return 0;
+}
+
+Why does this program crash?
+
+Since program is pointing buffer to a memory block "Hello", when "World" is copied to the buffer 
+it'll give an invalid memory reference error.
+
+4) Consider the following C snippet.
+void myfunc()
+{
+  char b[100];
+  char *buffer = &b[0];
+  strcpy(buffer, "World");
+}
+
+Is this correct?  What's a simpler expression for &b[0]?
+
+Yes. 
+
+Simplier version:
+
+void myfunc()
+{
+  char b[100];
+  char *buffer = malloc(100);
+  strcpy(buffer, "World");
+}
+
+5) Consider the following C program.
+#include <stdio.h>
+int main(int argc, char* argv[])
+{
+  printf("%s %s %s\n", *argv, (*(argv+1)) + 2, *(argv+2));
+  return 0;
+}
+
+If this code is executed using the following line, what will be the output?
+> program1 -n5 abc
+
+program1 5abc
+
+6) Consider the following C program.
+#include <stdio.h>
+#include <string.h>
+char *myfunc(char **argv)
+{
+  char buffer[100];
+  strcpy(buffer, "hello");
+  return buffer;
+}
+int main(int argc, char *argv[])
+{
+  char *s = myfunc(argv);
+  printf("%s\n", s);
+}
+
+What's wrong with this?
+
+Can't do char*s = myfunc(argv) as myfunc doesn't exist as a return function.
+

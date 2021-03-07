@@ -1,0 +1,25 @@
+Part Two: Fixing the Bugs
+-------------------------
+
+Understanding the code
+
+  1) Explain why this program uses the exclamation operator with the
+     strcmp() function.
+
+     If the words match, then the false boolean is returned. 
+
+  2) Explain why the 'LENGTH' macro returns the length of an array.
+     Would it work with a pointer to a dynamically allocated array? (Hint:
+     understand sizeof).
+
+Bug hunting
+
+  3) Explain and fix the logical flow bug within the switch statement.
+     (What happens when the -h option is used?)
+
+  4) Explain and fix the argument parsing error. (Why is entrycount never
+     zero?)
+
+  5) Fix print_result() to print results correctly and in the same order
+     as the words were specified on the command line.  Explain your solution.
+
