@@ -23,7 +23,7 @@ int countertwo = 0;
 int imthechild(const char *path_to_exec, char *const args[])
 {
 	// TO-DO P5.1
-	return execv(path_to_exec, args) ? -1 : 0;
+	return execvp(path_to_exec, args) ? -1 : 0;
 }
 
 void imtheparent(pid_t child_pid, int run_in_background)
