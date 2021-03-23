@@ -55,7 +55,13 @@ STEP 4:  Questions
   1. Why is it necessary to implement a change directory 'cd' command in
      the shell?  Could it be implemented by an external program instead?
 
+     It is needed in order to change directory in the shell. It's necessary to implement 
+     a cd command in the shell because even though it could be implemented using an 
+     external program, it would be more difficult to implement.
+
   2. Explain how our sample shell implements the change directory command.
+
+      Our sample shell uses cd /, what this does is take you back into the root directory of the current drive.
 
   3. What would happen if this program did not use the fork function, but
      just used execv directly?  (Try it!)
@@ -63,8 +69,13 @@ STEP 4:  Questions
      Try temporarily changing the code 'pid_from_fork = fork();'
      to 'pid_from_fork = 0;'
 
+     It would replace the current running program and call load a new program into the process. 
+
   4. Explain what the return value of fork() means and how this program
      uses it.
+
+     fork() usually always returns a positive value, but it is possible that it returns a negative value as well its just 
+     unlikely. What it does is it transfers the process ID of the child process and gives it to the parent.
 
   5. What would happen if fork() were called prior to chdir(), and chdir()
      invoked within the forked child process?  (Try it!)
@@ -78,14 +89,22 @@ STEP 4:  Questions
          exit(EXIT_SUCCESS);
      }
 
+     New proccesses would be created and then chdir() would be called in the new process.
+
   6. Can you run multiple versions of ./b.sh in the background?
      What happens to their output?
+
+     Yes, you can run multiple versions in the background. The output would overlap.
 
   7. Can you execute a second instance of our shell from within our shell
      program (use './shell')?  Which shell receives your input?
 
+     Yes. The second instance.
+
   8. What happens if you type CTRL-C while the countdown script ./b.sh is
      running?  What if ./b.sh is running in the background?
+
+     Nothing happens visually, but when you go to run the script again it will kill the past process and start a new one.
 
   9. Can a shell kill itself?  Can a shell within a shell kill the parent
      shell?
@@ -94,6 +113,8 @@ STEP 4:  Questions
      ./shell
      /bin/kill -s KILL NNN      (Where NNN is the the parent's PID.)
 
+     Yes, it can.
+
   10. What happens to background processes when you exit from the shell?
       Do they continue to run?  Can you see them with the 'ps' command?
 
@@ -101,6 +122,8 @@ STEP 4:  Questions
       ./b.sh&
       exit
       ps
+
+      Yes, they continue to run.
 
 
 STEP 5:  Modify the MP

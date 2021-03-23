@@ -18,6 +18,8 @@
 /* VARIABLE SECTION */
 enum { STATE_SPACE, STATE_NON_SPACE };	/* Parser states */
 
+int sub = 0;
+
 
 int imthechild(const char *path_to_exec, char *const args[])
 {
@@ -39,7 +41,7 @@ void imtheparent(pid_t child_pid, int run_in_background)
 		return;
 	}
 	// TO-DO P5.4
-	wait(&child_return_val);
+	waitpid(child_pid, &child_return_val, 0);
 	/* Use the WEXITSTATUS to extract the status code from the return value */
 	child_error_code = WEXITSTATUS(child_return_val);
 	fprintf(stderr,
@@ -64,6 +66,9 @@ int main(int argc, char **argv)
 	char *exec_argv[SHELL_MAX_ARGS + 1];
 	// TO-DO new variables for P5.2, P5.3, P5.6
 
+	int counter = 1;
+    char rerun[9][SHELL_BUFFER_SIZE]; 
+
 	/* Entrypoint for the testrunner program */
 	if (argc > 1 && !strcmp(argv[1], "-test")) {
 		return run_smp1_tests(argc - 1, argv + 1);
@@ -76,7 +81,7 @@ int main(int argc, char **argv)
 	/* The Shell runs in an infinite loop, processing input. */
 
 		// TO-DO P5.2
-		fprintf(stdout, "Shell(pid=%d)> ", shell_pid);
+		fprintf(stdout, "Shell(pid=%d)%d> ",shell_pid,counter);
 		fflush(stdout);
 
 		/* Read a line of input. */
@@ -87,6 +92,24 @@ int main(int argc, char **argv)
 		buffer[n_read - run_in_background - 1] = '\n';
 
 		// TO-DO P5.3
+
+		strcpy(rerun[counter -1], buffer);
+
+
+        int position = buffer[1] - "0";
+
+        while (buffer[0] == "!") 
+		{
+        	if(position <= counter -1) 
+			{
+			 strcpy(buffer, rerun[position - 1]);
+            }
+            else 
+			{
+            	fprintf(stderr, "Invalid command");
+            	break;
+            }
+        }
 
 		/* Parse the arguments: the first argument is the file or command *
 		 * we want to run.                                                */
@@ -116,7 +139,7 @@ int main(int argc, char **argv)
 			continue;
 		/* Terminate the list of exec parameters with NULL */
 		exec_argv[exec_argc] = NULL;
-
+		counter++;
 		/* If Shell runs 'exit' it exits the program. */
 		if (!strcmp(exec_argv[0], "exit")) {
 			printf("Exiting process %d\n", shell_pid);
@@ -145,7 +168,21 @@ int main(int argc, char **argv)
 				
 				// TO-DO P5.6
 
-				return imthechild(exec_argv[0], &exec_argv[0]);
+				if (!strcmp(exec_argv[0], "sub"))
+					{
+						if(sub + 1 <= 3){
+						strcpy(exec_argv[0],argv[0]);
+						sub++;
+						counter = 0;
+						shell_pid = getpid();
+						}
+						else {
+							fprintf(stderr, "Too deep!\n");
+							return imthechild(exec_argv[0], &exec_argv[0]);
+						}
+					}
+					else
+						return imthechild(exec_argv[0], &exec_argv[0]);
 				/* Exit from main. */
 			} else {
 				imtheparent(pid_from_fork, run_in_background);
