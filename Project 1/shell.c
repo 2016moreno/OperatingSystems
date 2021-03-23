@@ -92,17 +92,17 @@ int main(int argc, char **argv)
 
 		// TO-DO P5.3
 		strcpy(rerun[counter - 1], buffer);
-                int position = buffer[1] - '0';
+        int position = buffer[1] - '0';
 
-                while (buffer[0] == '!') {
-                        if(position <= counter -1) {
-                                strcpy(buffer, rerun[position-1]);
-                        }
-                        else {
-                                fprintf(stderr, "Invalid command");
-                                break;
-                        }
+        while (buffer[0] == '!'){
+                if(position <= counter -1) {
+                        strcpy(buffer, rerun[position-1]);
                 }
+                else{
+                        fprintf(stderr, "Invalid command");
+                        break;
+                }
+        }
 		/* Parse the arguments: the first argument is the file or command *
 		 * we want to run.                                                */
 
@@ -160,18 +160,24 @@ int main(int argc, char **argv)
 			if (pid_from_fork == 0) {
 				
 				// TO-DO P5.6
+			
 				if(!strcmp(exec_argv[0], "sub")){ 
-									   counter = 1; 
-									   countertwo++;
-									   shell_pid = getpid();	
+
+					counter = 1; 
+					countertwo++;
+					shell_pid = getpid();	
 									   
-									   if(countertwo >= 3){
-										   fprintf(stderr, "Too deep!\n");
-										   return 0;
-										   }
-										}
-         								else 
-         								return imthechild(exec_argv[0], &exec_argv[0]);
+					if(countertwo >= 3){
+
+						fprintf(stderr, "Too deep!\n");
+						return 0;
+					}
+				}
+         	else {
+
+         	return imthechild(exec_argv[0], &exec_argv[0]);
+
+			 }
 				/* Exit from main. */
 			} else {
 				imtheparent(pid_from_fork, run_in_background);
