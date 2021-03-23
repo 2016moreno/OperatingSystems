@@ -17,6 +17,7 @@
 
 /* VARIABLE SECTION */
 enum { STATE_SPACE, STATE_NON_SPACE };	/* Parser states */
+int countertwo = 0;
 
 
 int imthechild(const char *path_to_exec, char *const args[])
@@ -65,7 +66,6 @@ int main(int argc, char **argv)
 	// TO-DO new variables for P5.2, P5.3, P5.6
 	int counter = 1;
     char rerun[9][SHELL_BUFFER_SIZE]; 
-	int countertwo = 0;
 
 
 	/* Entrypoint for the testrunner program */
