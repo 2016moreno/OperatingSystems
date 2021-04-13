@@ -89,7 +89,10 @@ void *adder(void *arg)
 	startOffset = remainderOffset = -1;
 	value1 = value2 = -1;
 
+	pthread_mutex_unlock(&buffer_lock);
+
 	if (timeToFinish()) {
+		pthread_mutex_unlock(&buffer_lock);
 	    return NULL;
 	}
 
@@ -118,7 +121,8 @@ void *adder(void *arg)
 			{
 				i++;
 			} while (isNumeric(buffer[i]));
-				remainderOffset = i;
+				
+			remainderOffset = i;
 
 			int2string(result, nString);
 
