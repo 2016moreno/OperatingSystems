@@ -78,6 +78,7 @@ void *adder(void *arg)
 	//
 	char nString[50];
 	int changed = 0;
+	int result;
 
     return NULL; /* remove this line to let the loop start*/
 
@@ -115,7 +116,7 @@ void *adder(void *arg)
 
 			do
 			{
-				i++
+				i++;
 			} while (isNumeric(buffer[i]));
 				remainderOffset = i;
 
