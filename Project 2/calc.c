@@ -80,7 +80,7 @@ void *adder(void *arg)
 	int changed = 0;
 	int result;
 
-    return NULL; /* remove this line to let the loop start*/
+    // return NULL; /* remove this line to let the loop start*/
 
     while (1) {
 
@@ -168,16 +168,24 @@ void *multiplier(void *arg)
     int startOffset, remainderOffset;
     int i;
 
-    return NULL; /* remove this line */
+	//
+	char nString[50];
+	int changed = 0;
+	int result;
+	
+
+    // return NULL; /* remove this line */
 
     while (1) {
 		/* Step 3: add mutual exclusion */
 
-
 	startOffset = remainderOffset = -1;
 	value1 = value2 = -1;
 
+	pthread_mutex_lock(&mutexLock);
+
 	if (timeToFinish()) {
+		pthread_mutex_lock(&mutexLock);
 	    return NULL;
 	}
 
@@ -187,16 +195,51 @@ void *multiplier(void *arg)
 	/* Step 2: implement multiplier */
 	for (i = 0; i < bufferlen; i++) {
 	    // same as adder, but v1*v2
+		if(isNumeric(buffer[i])) { 
+			startOffset = i;
+			value1 = string2int(buffer[i]); 
+			while (isNumeric(buffer[i])) {
+				i++;
+			}
+
+			if(buffer[i] != '*' || !isNumeric(buffer[i+1])){
+				continue;
+			}
+			value2 = string2int(buffer[i+1]); 
+			result = value1 * value2;
+
+			do
+			{
+				i++;
+			} while (isNumeric(buffer[i]));
+				
+			remainderOffset = i;
+
+			int2string(result, nString);
+
+			strcpy(buffer[startOffset], nString); 
+
+			strcpy(buffer[startOffset+strlen(nString)], buffer[remainderOffset]); 
+
+			//what if we have 430+4500
+			bufferlen = strlen(buffer);
+			i = remainderOffset - 1;
+
+			changed = 1;
+			num_ops++;
 	}
 
 	// something missing?
 	/* Step 3: free the lock */
-	
+	pthread_mutex_unlock(&buffer_lock);
 
 	/* Step 6: check progress */
-
+	sem_wait(&progress_lock);
+	progress.add = changed ? 2 : 1;
+	sem_post(&progress_lock);
 
 	/* Step 5: let others play */
+	sched_yield();
 
     }
 }
@@ -209,15 +252,21 @@ void *degrouper(void *arg)
 {
     int bufferlen;
     int i;
+	//
+	int startOffset;
+	int changed = 0;
 
-    return NULL; /* remove this line */
+    // return NULL; /* remove this line */
 
     while (1) {
 
 		/* Step 3: add mutual exclusion */
 
+	pthread_mutex_lock(&mutexLock);
 
 	if (timeToFinish()) {
+
+		pthread_mutex_lock(&mutexLock);
 	    return NULL;
 	}
 
@@ -227,18 +276,43 @@ void *degrouper(void *arg)
 	/* Step 2: implement degrouper */
 	for (i = 0; i < bufferlen; i++) {
 	    // check for '(' followed by a naked number followed by ')'
+		if(buffer[i] == '(' && isNumeric(buffer[i + 1]))
+		{
+			startOffset = i;
+
+			do
+			{
+				i++;
+			} while(isNumeric(buffer[i]));
+
+			if(buffer[i] != ')')
+			{
+				i--;
+				continue;
+			}
+		}
 	    // remove ')' by shifting the tail end of the expression
+		strcpy(buffer[i], buffer[i + 1]);
 	    // remove '(' by shifting the beginning of the expression
+		strcpy(buffer[startOffset], buffer[startOffset + 1]);
+
+		bufferlen -= 2;
+		i = startOffset;
+		changed = 1;
+		num_ops++;
 	}
 
 	// something missing?
 	/* Step 3: free the lock */
-
+	pthread_mutex_unlock(&buffer_lock);
 
 	/* Step 6: check progress */
-
+	sem_wait(&progress_lock);
+	progress.add = changed ? 2 : 1;
+	sem_post(&progress_lock);
 
 	/* Step 5: let others play */
+	sched_yield();
 
     }
 }
