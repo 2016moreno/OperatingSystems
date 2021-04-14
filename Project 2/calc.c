@@ -89,10 +89,8 @@ void *adder(void *arg)
 	startOffset = remainderOffset = -1;
 	value1 = value2 = -1;
 
-	pthread_mutex_unlock(&buffer_lock);
 
 	if (timeToFinish()) {
-		pthread_mutex_unlock(&buffer_lock);
 	    return NULL;
 	}
 
@@ -184,11 +182,9 @@ void *multiplier(void *arg)
 	startOffset = remainderOffset = -1;
 	value1 = value2 = -1;
 
-		pthread_mutex_unlock(&buffer_lock);
 
 
 	if (timeToFinish()) {
-			pthread_mutex_unlock(&buffer_lock);
 
 	    return NULL;
 	}
@@ -272,11 +268,8 @@ void *degrouper(void *arg)
 
 		/* Step 3: add mutual exclusion */
 
-		pthread_mutex_unlock(&buffer_lock);
 
 	if (timeToFinish()) {
-
-		pthread_mutex_unlock(&buffer_lock);
 	    return NULL;
 	}
 
