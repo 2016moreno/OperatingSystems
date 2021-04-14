@@ -89,8 +89,9 @@ void *adder(void *arg)
 	startOffset = remainderOffset = -1;
 	value1 = value2 = -1;
 
-
+	pthread_mutex_lock(&buffer_lock);
 	if (timeToFinish()) {
+		pthread_mutex_unlock(&buffer_lock);
 	    return NULL;
 	}
 
@@ -183,9 +184,9 @@ void *multiplier(void *arg)
 	value1 = value2 = -1;
 
 
-
+	pthread_mutex_lock(&buffer_lock);
 	if (timeToFinish()) {
-
+	pthread_mutex_unlock(&buffer_lock);
 	    return NULL;
 	}
 
@@ -268,8 +269,9 @@ void *degrouper(void *arg)
 
 		/* Step 3: add mutual exclusion */
 
-
+	pthread_mutex_lock(&buffer_lock);
 	if (timeToFinish()) {
+	pthread_mutex_unlock(&buffer_lock);
 	    return NULL;
 	}
 
@@ -338,8 +340,9 @@ void *sentinel(void *arg)
     while (1) {
 
 		/* Step 3: add mutual exclusion */
-
+		pthread_mutex_lock(&buffer_lock);
 	if (timeToFinish()) {
+		pthread_mutex_unlock(&buffer_lock);
 	    return NULL;
 	}
 
@@ -368,9 +371,28 @@ void *sentinel(void *arg)
 
 	// something missing?
 	/* Step 6: check for progress */
+	if(buffer[0] != 0)
+	{
+		pthread_mutex_unlock(&buffer_lock);
+		sem_wait(&progress_lock);
 
+		if(progress.add && progress.mult && progress.group)
+		{
+			if(progress.add > 1 || progress.mult > 1 || progress.group > 1)
+			{
+				memset(&progress, 0, sizeof(struct progress_t));
+			}
+			else{
+				printf(stdout, "No progress can be made \n");
+				exit(EXIT_FAILURE);
+			}
+		}
+		sem_post(&progress_lock);
+	}
 
 	/* Step 5: let others play, too */
+	pthread_mutex_unlock(&buffer_lock);
+	sched_yield();
 
     }
 }
@@ -402,17 +424,27 @@ void *reader(void *arg)
 	/* -1 for null terminator, -1 for ; separator */
 	free = sizeof(buffer) - currentlen - 2;
 
-	while (free < newlen) {
-		// spinwaiting TO DO
-	}
+	do 
+	{
+		/* Step 3: add mutual exclusion */
+		pthread_mutex_lock(&buffer_lock);
+		currentlen = strlen(buffer);
+		free = sizeof(buffer) - currentlen - 2;
+		pthread_mutex_unlock(&buffer_lock);
+		sched_yield();
+		} while(free < newlen);
+		pthread_mutex_lock(&buffer_lock);
 
-	/* Step 3: add mutual exclusion */
 
 	/* we can add another expression now */
 	strcat(buffer, tBuffer);
 	strcat(buffer, ";");
 
 	/* Step 6: reset flag variables indicating progress */
+	sem_wait(&progress_lock);
+	memset(&progress, 0, sizeof(struct progress_t));
+	sem_post(&progress_lock);
+	pthread_mutex_unlock(&buffer_lock);
 
 	/* Stop when user enters '.' */
 	if (tBuffer[0] == '.') {
@@ -428,7 +460,7 @@ int smp3_main(int argc, char **argv)
     void *arg = 0;		/* dummy value */
 
 	/* Step 7: initialize your semaphore */
-
+	sem_init(&progress_lock,0,1)
     /* let's create our threads */
     if (pthread_create(&multiplierThread, NULL, multiplier, arg)
 	|| pthread_create(&adderThread, NULL, adder, arg)
@@ -443,6 +475,7 @@ int smp3_main(int argc, char **argv)
 	for processes. A call to pthread_join blocks the calling thread until 
 	the thread with identifier equal to the first argument terminates.*/
 	// If you join do not detach.
+	pthread_join(sentinelThread, NULL);
     pthread_detach(multiplierThread);
     pthread_detach(adderThread);
     pthread_detach(degrouperThread);
@@ -455,7 +488,8 @@ int smp3_main(int argc, char **argv)
     fprintf(stdout, "Performed a total of %d operations\n", num_ops);
 
 	// TODO destroy semaphores and mutex
-
+	pthread_mutex_destroy(&buffer_lock);
+	sem_destroy(&progress_lock);
 
 	// return
     return EXIT_SUCCESS;

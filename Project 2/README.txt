@@ -120,10 +120,16 @@ Q1: At this point, your solution does not contain any synchronization or
 mutual exclusion.  Give an example of and explain a possible
 synchronization error that could occur in this code. Be specific.
 
+A possible synchronization error that can occur is that we try to add and multiply at the same time because nothing is not allowing 
+multiple threads to access the same area at the same time, thus making a mess of both answers.
+
 Q2: Suppose we implement correct synchronization and mutual exclusion
 for all of the threads.  If our three functions were to operate on all
 expression in the buffer at once (not just the first expression), would
 the program generate incorrect output?  Why or why not?
+
+It would still generate an incorrect output because an expression with zero operations would print before an expression with many operations,
+making the order invalid.
 
 
 Step 3: Critical Sections
@@ -148,13 +154,23 @@ synchronization errors (e.g., race conditions, data corruption).
 Q3: For this step, what specific data structure(s) need(s) protection?
 Why?
 
+Pointers due to memory leaks.
+
 Q4: What would happen if you had a busy-wait within one of your critical
 sections?  What if it is a loop with sched_yield()?
+
+Process has a chance of never going into the critical section due to order of what's allowed.
+
+If it is in a loop with sched_yield(), then it will return a thread.
 
 Q5: Why is it sometimes necessary to use the non-blocking
 pthread_mutex_trylock() instead of the blocking pthread_mutex_lock()?
 Think for example of a program that needs to acquire multiple mutexes at
 the same time.
+
+Because you can use pthread_mutex_trylock() to avoid deadlocks.
+
+If your threads aquire and release mutexes in the same order, then your program is deadlock free.
 
 
 Step 4: Accounting
@@ -170,6 +186,9 @@ this variable is free from race conditions.
 Q6: Is a new mutex, separate from what you have in Step 3, required to
 correctly implement this behavior?  Why or why not?
 
+Yes because memory access needs to be re-ordered in order to make sure that only one thread
+is executing a piece of the program at a time.
+
 
 Step 5: Performance
 -------------------
@@ -182,11 +201,17 @@ sched_yield() calls at the appropriate place inside these loops.
 Q7: Why is it important, even on single-processor machines, to keep the
 critical sections as small as possible?
 
+To have a low margin of error, such as like in the openTDD extra credit, it's better to have 
+well organized critical sections so that your program runs better.
+
 Q8: Why is spin-waiting without yielding usually inefficient?
+
+It will starve your program because there's no yielding of the priority of processes involved.
 
 Q9: When might spin-waiting without yielding or blocking actually be
 *more* efficient?
 
+Less extras required, can just run the program without any checks.
 
 Step 6: Monitoring Progress
 ---------------------------
@@ -233,6 +258,7 @@ Q10:  You have to supply an initial value when creating a semaphore.
 Which value should you use to mimic the default functionality of a mutex?
 What would happen if you specified a larger value?
 
+Might exceed the maximum number of semaphores allowed.
 
 Testing
 -------
