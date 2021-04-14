@@ -460,7 +460,7 @@ int smp3_main(int argc, char **argv)
     void *arg = 0;		/* dummy value */
 
 	/* Step 7: initialize your semaphore */
-	sem_init(&progress_lock,0,1)
+	sem_init(&progress_lock,0,1);
     /* let's create our threads */
     if (pthread_create(&multiplierThread, NULL, multiplier, arg)
 	|| pthread_create(&adderThread, NULL, adder, arg)
