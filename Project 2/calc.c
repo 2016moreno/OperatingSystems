@@ -133,7 +133,7 @@ void *adder(void *arg)
 
 			//what if we have 430+4500
 			bufferlen = strlen(buffer);
-			i = remainderOffset + (strlen(nStrng)) - 1;
+			i = remainderOffset + (strlen(nString)) - 1;
 
 			changed = 1;
 			num_ops++;
