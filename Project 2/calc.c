@@ -133,7 +133,7 @@ void *adder(void *arg)
 
 			//what if we have 430+4500
 			bufferlen = strlen(buffer);
-			i = remainderOffset - 1;
+			i = remainderOffset + (strlen(nStrng)) - 1;
 
 			changed = 1;
 			num_ops++;
@@ -241,7 +241,7 @@ void *multiplier(void *arg)
 
 	/* Step 6: check progress */
 	sem_wait(&progress_lock);
-	progress.add = changed ? 2 : 1;
+	progress.mult = changed ? 2 : 1;
 	sem_post(&progress_lock);
 
 	/* Step 5: let others play */
@@ -314,7 +314,7 @@ void *degrouper(void *arg)
 
 	/* Step 6: check progress */
 	sem_wait(&progress_lock);
-	progress.add = changed ? 2 : 1;
+	progress.group = changed ? 2 : 1;
 	sem_post(&progress_lock);
 
 	/* Step 5: let others play */
@@ -460,7 +460,7 @@ int smp3_main(int argc, char **argv)
     void *arg = 0;		/* dummy value */
 
 	/* Step 7: initialize your semaphore */
-	sem_init(&progress_lock,0,1);
+	sem_init(&progress_lock, 0, 1);
     /* let's create our threads */
     if (pthread_create(&multiplierThread, NULL, multiplier, arg)
 	|| pthread_create(&adderThread, NULL, adder, arg)
