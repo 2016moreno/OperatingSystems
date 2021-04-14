@@ -100,11 +100,13 @@ void *adder(void *arg)
 	bufferlen = strlen(buffer);
 
 	/* Step 2: implement adder */
-	for (i = 0; i < bufferlen; i++) {
+	for (i = 0; i < bufferlen; i++) 
+	{
 	    // do we have value1 already?  If not, is this a "naked" number?
 	    // if we do, is the next character after it a '+'?
 	    // if so, is the next one after the sign a "naked" number?
-		if(isNumeric(buffer[i])) { // 400 + 30
+		if(isNumeric(buffer[i])) 
+		{ // 400 + 30
 			startOffset = i;
 			value1 = string2int(buffer[i]); //400
 			while (isNumeric(buffer[i])) {
@@ -195,16 +197,20 @@ void *multiplier(void *arg)
 	bufferlen = strlen(buffer);
 
 	/* Step 2: implement multiplier */
-	for (i = 0; i < bufferlen; i++) {
+	for (i = 0; i < bufferlen; i++) 
+	{
 	    // same as adder, but v1*v2
-		if(isNumeric(buffer[i])) { 
+		if(isNumeric(buffer[i])) 
+		{ 
 			startOffset = i;
 			value1 = string2int(buffer[i]); 
-			while (isNumeric(buffer[i])) {
+			while (isNumeric(buffer[i])) 
+			{
 				i++;
 			}
 
-			if(buffer[i] != '*' || !isNumeric(buffer[i+1])){
+			if(buffer[i] != '*' || !isNumeric(buffer[i+1]))
+			{
 				continue;
 			}
 			value2 = string2int(buffer[i+1]); 
@@ -229,6 +235,7 @@ void *multiplier(void *arg)
 
 			changed = 1;
 			num_ops++;
+		}
 	}
 
 	// something missing?
@@ -243,7 +250,8 @@ void *multiplier(void *arg)
 	/* Step 5: let others play */
 	sched_yield();
 
-    }
+   	 
+	}
 }
 
 
@@ -276,7 +284,8 @@ void *degrouper(void *arg)
 	bufferlen = strlen(buffer);
 
 	/* Step 2: implement degrouper */
-	for (i = 0; i < bufferlen; i++) {
+	for (i = 0; i < bufferlen; i++) 
+	{
 	    // check for '(' followed by a naked number followed by ')'
 		if(buffer[i] == '(' && isNumeric(buffer[i + 1]))
 		{
