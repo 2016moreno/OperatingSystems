@@ -277,35 +277,60 @@ void *degrouper(void *arg)
 
 	/* storing this prevents having to recalculate it in the loop */
 	bufferlen = strlen(buffer);
+	changed = 0;
+
+	int temp = 1;
 
 	/* Step 2: implement degrouper */
 	for (i = 0; i < bufferlen; i++) 
 	{
-	    // check for '(' followed by a naked number followed by ')'
-		if(buffer[i] == '(' && isNumeric(buffer[i + 1]))
+
+		if (temp == 0) 
 		{
+			break;
+		}
+
+		int j = i;
+		if (bufferlen > 0)
+			while (j < bufferlen) 
+			{
+				if (buffer[j] == '(') 
+				{
+					i = j;
+				}
+				j++;
+			}
+			
+		if (buffer[i] == '(' && isdigit(buffer[i + 1])) 
+		{
+
 			startOffset = i;
 
-			do
+			while (buffer[i] != ')') 
 			{
 				i++;
-			} while(isNumeric(buffer[i]));
-
-			if(buffer[i] != ')')
-			{
-				i--;
-				continue;
+				if (buffer[i] == '+' || buffer[i] == '*') 
+				{
+					temp = 0;
+					break;
+				}
 			}
-		}
-	    // remove ')' by shifting the tail end of the expression
-		strcpy(buffer[i], buffer[i + 1]);
-	    // remove '(' by shifting the beginning of the expression
-		strcpy(buffer[startOffset], buffer[startOffset + 1]);
+				
+			if (temp == 0)
+				continue;
+				
+			// remove ')' by shifting the tail end of the expression
+			strcpy((buffer + i), (buffer + i + 1));
 
-		bufferlen -= 2;
-		i = startOffset;
-		changed = 1;
-		num_ops++;
+			// remove '(' by shifting the beginning of the expression
+			strcpy((buffer + startOffset), (buffer + startOffset + 1));
+			// set buffer length and position
+            num_ops--;
+			bufferlen -= 2;
+			i = startOffset;
+			changed = 1;
+		}
+			
 	}
 
 	// something missing?
@@ -450,7 +475,7 @@ void *reader(void *arg)
 	if (tBuffer[0] == '.') {
 	    return NULL;
 	}
-    }
+	}
 }
 
 
@@ -475,6 +500,7 @@ int smp3_main(int argc, char **argv)
 	for processes. A call to pthread_join blocks the calling thread until 
 	the thread with identifier equal to the first argument terminates.*/
 	// If you join do not detach.
+	pthread_join(sentinelThread, NULL);
     pthread_detach(multiplierThread);
     pthread_detach(adderThread);
     pthread_detach(degrouperThread);
@@ -482,7 +508,6 @@ int smp3_main(int argc, char **argv)
     pthread_detach(readerThread);
 	/* Step 1: we have to join on the ________ thread. */
 	// pthread_join(____, NULL);
-	pthread_join(sentinelThread, NULL);
 
     /* everything is finished, print out the number of operations performed */
     fprintf(stdout, "Performed a total of %d operations\n", num_ops);
