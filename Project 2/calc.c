@@ -107,7 +107,7 @@ void *adder(void *arg)
 		if(isNumeric(buffer[i])) 
 		{ // 400 + 30
 			startOffset = i;
-			value1 = string2int(buffer[i]); //400
+			value1 = string2int(buffer + i); //400
 			while (isNumeric(buffer[i])) {
 				i++;
 			}
@@ -115,7 +115,7 @@ void *adder(void *arg)
 			if(buffer[i] != '+' || !isNumeric(buffer[i+1])){
 				continue;
 			}
-			value2 = string2int(buffer[i+1]); //30
+			value2 = string2int(buffer + i + 1]); //30
 			result = value1 + value2;
 
 			do
@@ -127,13 +127,14 @@ void *adder(void *arg)
 
 			int2string(result, nString);
 
-			strcpy(buffer[startOffset], nString); // 430+30*4500
+			strcpy(buffer + startOffset, nString); // 430+30*4500
 
-			strcpy(buffer[startOffset+strlen(nString)], buffer[remainderOffset]); //430 * 4500
+			strcpy(buffer+ startOffset + strlen(nString), buffer + remainderOffset); //430 * 4500
 
 			//what if we have 430+4500
 			bufferlen = strlen(buffer);
-			i = remainderOffset + (strlen(nString)) - 1;
+			//i = remainderOffset + (strlen(nString)) - 1;
+			i = remainderOffset - 1;
 
 			changed = 1;
 			num_ops++;
