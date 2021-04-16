@@ -115,7 +115,7 @@ void *adder(void *arg)
 			if(buffer[i] != '+' || !isNumeric(buffer[i+1])){
 				continue;
 			}
-			value2 = string2int(buffer + i + 1]); //30
+			value2 = string2int(buffer + i + 1); //30
 			result = value1 + value2;
 
 			do
