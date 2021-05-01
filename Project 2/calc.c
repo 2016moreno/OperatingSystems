@@ -111,7 +111,7 @@ void *adder(void *arg)
 		{ // 400 + 30
 			startOffset = i;
 			value1 = string2int(buffer[i]); //400
-			char bcloner[INT_MAX];
+			char bcloner[1000];
 
 
 			while (isNumeric(buffer[i])) {
