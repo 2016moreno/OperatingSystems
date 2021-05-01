@@ -79,6 +79,7 @@ void *adder(void *arg)
 	char nString[50];
 	int changed = 0;
 	int result;
+	int sum;
 
     // return NULL; /* remove this line to let the loop start*/
 
@@ -97,6 +98,7 @@ void *adder(void *arg)
 
 	/* storing this prevents having to recalculate it in the loop */
 	bufferlen = strlen(buffer);
+	sum = 0;
 
 	/* Step 2: implement adder */
 	for (i = 0; i < bufferlen; i++) 
@@ -104,6 +106,10 @@ void *adder(void *arg)
 	    // do we have value1 already?  If not, is this a "naked" number?
 	    // if we do, is the next character after it a '+'?
 	    // if so, is the next one after the sign a "naked" number?
+		if (buffer[i]== ';')
+		{
+			break;
+		}
 		if(isNumeric(buffer[i])) 
 		{ // 400 + 30
 			startOffset = i;
@@ -134,8 +140,7 @@ void *adder(void *arg)
 			//what if we have 430+4500
 			bufferlen = strlen(buffer);
 			i = remainderOffset + (strlen(nString)) - 1;
-
-			changed = 1;
+			sum = 1;
 			num_ops++;
 			
 		}
@@ -150,7 +155,7 @@ void *adder(void *arg)
 
 	/* Step 6: check progress */
 	sem_wait(&progress_lock);
-	progress.add = changed ? 2 : 1;
+	progress.add = sum ? 2 : 1;
 	sem_post(&progress_lock);
 
 	/* Step 5: let others play */
@@ -173,6 +178,8 @@ void *multiplier(void *arg)
 	char nString[50];
 	int changed = 0;
 	int result;
+	int sum;
+
 	
 
     // return NULL; /* remove this line */
@@ -192,13 +199,22 @@ void *multiplier(void *arg)
 
 	/* storing this prevents having to recalculate it in the loop */
 	bufferlen = strlen(buffer);
+	sum = 0;
 
 	/* Step 2: implement multiplier */
 	for (i = 0; i < bufferlen; i++) 
 	{
 	    // same as adder, but v1*v2
+		if (buffer[i] == ';')
+		{
+			break;
+		}
 		if(isNumeric(buffer[i])) 
 		{ 
+			if (buffer[i] == '*' && buffer[i+1] == '(')
+			{
+				i=i+2;
+			}
 			startOffset = i;
 			value1 = string2int(buffer[i]); 
 			while (isNumeric(buffer[i])) 
@@ -220,6 +236,8 @@ void *multiplier(void *arg)
 				
 			remainderOffset = i;
 
+			sprintf(nString, "%d", result);
+
 			int2string(result, nString);
 
 			strcpy(buffer[startOffset], nString); 
@@ -229,8 +247,7 @@ void *multiplier(void *arg)
 			//what if we have 430+4500
 			bufferlen = strlen(buffer);
 			i = remainderOffset - 1;
-
-			changed = 1;
+			sum = 1;
 			num_ops++;
 		}
 	}
@@ -241,7 +258,7 @@ void *multiplier(void *arg)
 
 	/* Step 6: check progress */
 	sem_wait(&progress_lock);
-	progress.mult = changed ? 2 : 1;
+	progress.mult = sum ? 2 : 1;
 	sem_post(&progress_lock);
 
 	/* Step 5: let others play */
@@ -262,6 +279,7 @@ void *degrouper(void *arg)
 	//
 	int startOffset;
 	int changed = 0;
+	int sum;
 
     // return NULL; /* remove this line */
 
@@ -277,61 +295,33 @@ void *degrouper(void *arg)
 
 	/* storing this prevents having to recalculate it in the loop */
 	bufferlen = strlen(buffer);
-	changed = 0;
-
-	int temp = 1;
+	sum = 0;
 
 	/* Step 2: implement degrouper */
 	for (i = 0; i < bufferlen; i++) 
 	{
-
-		if (temp == 0) 
+		if (buffer[i] =='(' && isNumeric(buffer[i+1]))
 		{
-			break;
+	    startOffset = i;
+		   do{
+			   i++;
+		   }while(isNumeric(buffer[i]));
 		}
-
-		int j = i;
-		if (bufferlen > 0)
-			while (j < bufferlen) 
-			{
-				if (buffer[j] == '(') 
-				{
-					i = j;
-				}
-				j++;
-			}
-			
-		if (buffer[i] == '(' && isdigit(buffer[i + 1])) 
-		{
-
-			startOffset = i;
-
-			while (buffer[i] != ')') 
-			{
-				i++;
-				if (buffer[i] == '+' || buffer[i] == '*') 
-				{
-					temp = 0;
-					break;
-				}
-			}
-				
-			if (temp == 0)
-				continue;
+		
 				
 			// remove ')' by shifting the tail end of the expression
-			strcpy((buffer + i), (buffer + i + 1));
+			strcpy(buffer + i, buffer + i + 1);
 
 			// remove '(' by shifting the beginning of the expression
-			strcpy((buffer + startOffset), (buffer + startOffset + 1));
+			strcpy(buffer + startOffset, buffer + startOffset + 1);
 			// set buffer length and position
-            num_ops--;
 			bufferlen -= 2;
 			i = startOffset;
-			changed = 1;
+            num_ops++;
+			sum = 1;
 		}
 			
-	}
+	
 
 	// something missing?
 	/* Step 3: free the lock */
@@ -339,7 +329,7 @@ void *degrouper(void *arg)
 
 	/* Step 6: check progress */
 	sem_wait(&progress_lock);
-	progress.group = changed ? 2 : 1;
+	progress.group = sum ? 2 : 1;
 	sem_post(&progress_lock);
 
 	/* Step 5: let others play */
@@ -472,7 +462,8 @@ void *reader(void *arg)
 	pthread_mutex_unlock(&buffer_lock);
 
 	/* Stop when user enters '.' */
-	if (tBuffer[0] == '.') {
+	if (tBuffer[0] == '.') 
+	{
 	    return NULL;
 	}
 	}
