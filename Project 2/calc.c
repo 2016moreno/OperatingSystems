@@ -1,4 +1,4 @@
- /* Project 2 - Multithreaded calculator */
+/* Project 2 - Multithreaded calculator */
 // Name: 
 
 
@@ -78,18 +78,18 @@ void *adder(void *arg)
 	//
 	char nString[50];
 	int changed = 0;
-	int sum;
+	int result;
 
     // return NULL; /* remove this line to let the loop start*/
 
     while (1) {
 
 		/* Step 3: add mutual exclusion */
-	pthread_mutex_lock(&buffer_lock);
 
 	startOffset = remainderOffset = -1;
 	value1 = value2 = -1;
 
+	pthread_mutex_lock(&buffer_lock);
 	if (timeToFinish()) {
 		pthread_mutex_unlock(&buffer_lock);
 	    return NULL;
@@ -97,7 +97,6 @@ void *adder(void *arg)
 
 	/* storing this prevents having to recalculate it in the loop */
 	bufferlen = strlen(buffer);
-	changed = 0;
 
 	/* Step 2: implement adder */
 	for (i = 0; i < bufferlen; i++) 
@@ -105,15 +104,14 @@ void *adder(void *arg)
 	    // do we have value1 already?  If not, is this a "naked" number?
 	    // if we do, is the next character after it a '+'?
 	    // if so, is the next one after the sign a "naked" number?
-
-
+		if (buffer[i]== ';')
+		{
+			break;
+		}
 		if(isNumeric(buffer[i])) 
 		{ // 400 + 30
 			startOffset = i;
 			value1 = string2int(buffer[i]); //400
-			char bcloner[1000];
-
-
 			while (isNumeric(buffer[i])) {
 				i++;
 			}
@@ -122,7 +120,7 @@ void *adder(void *arg)
 				continue;
 			}
 			value2 = string2int(buffer[i+1]); //30
-			int result = value1 + value2;
+			result = value1 + value2;
 
 			do
 			{
@@ -133,14 +131,13 @@ void *adder(void *arg)
 
 			int2string(result, nString);
 
-			strcpy(bcloner, &buffer);
+			strcpy(buffer[startOffset], nString); // 430+30*4500
 
-			strcpy(buffer + startOffset, &nString); 
+			strcpy(buffer[startOffset+strlen(nString)], buffer[remainderOffset]); //430 * 4500
 
-			strcpy(buffer + (startOffset + strlen(nString)), &bcloner[remainderOffset]);
-
-			bufferlen = bufferlen - (remainderOffset - 1 - startOffset);;
-			i = remainderOffset + - 1;
+			//what if we have 430+4500
+			bufferlen = strlen(buffer);
+			i = remainderOffset + (strlen(nString)) - 1;
 			changed = 1;
 			num_ops++;
 			
@@ -178,32 +175,41 @@ void *multiplier(void *arg)
 	//
 	char nString[50];
 	int changed = 0;
+	int result;
 
-	
 
     // return NULL; /* remove this line */
 
     while (1) {
 		/* Step 3: add mutual exclusion */
-	pthread_mutex_lock(&buffer_lock);
+
 	startOffset = remainderOffset = -1;
 	value1 = value2 = -1;
 
+
+	pthread_mutex_lock(&buffer_lock);
 	if (timeToFinish()) {
-		pthread_mutex_unlock(&buffer_lock);
+	pthread_mutex_unlock(&buffer_lock);
 	    return NULL;
 	}
 
 	/* storing this prevents having to recalculate it in the loop */
 	bufferlen = strlen(buffer);
-	changed = 0;
 
 	/* Step 2: implement multiplier */
 	for (i = 0; i < bufferlen; i++) 
 	{
 	    // same as adder, but v1*v2
+		if (buffer[i] == ';')
+		{
+			break;
+		}
 		if(isNumeric(buffer[i])) 
 		{ 
+			if (buffer[i] == '*' && buffer[i+1] == '(')
+			{
+				i=i+2;
+			}
 			startOffset = i;
 			value1 = string2int(buffer[i]); 
 			while (isNumeric(buffer[i])) 
@@ -215,8 +221,8 @@ void *multiplier(void *arg)
 			{
 				continue;
 			}
-			value2 = string2int(&buffer[i + 1]);
-			int result = value1 * value2;
+			value2 = string2int(buffer[i+1]); 
+			result = value1 * value2;
 
 			do
 			{
@@ -225,24 +231,17 @@ void *multiplier(void *arg)
 				
 			remainderOffset = i;
 
+			sprintf(nString, "%d", result);
+
 			int2string(result, nString);
-			
-			int2string(result, nString);
-			
-			strncpy(buffer + startOffset, &nString[0], strlen(nString));
-			
-			strcpy(buffer + startOffset + strlen(nString), buffer + remainderOffset);
-			
-			bufferlen = bufferlen - (remainderOffset - 1 - startOffset);
-			
-			i = startOffset - 1;
-			
-			startOffset = 0;
-			
-			remainderOffset = 0;
-			
+
+			strcpy(buffer[startOffset], nString); 
+
+			strcpy(buffer[startOffset+strlen(nString)], buffer[remainderOffset]); 
+
+			bufferlen = strlen(buffer);
+			i = remainderOffset - 1;
 			changed = 1;
-			
 			num_ops++;
 		}
 	}
@@ -258,6 +257,8 @@ void *multiplier(void *arg)
 
 	/* Step 5: let others play */
 	sched_yield();
+
+   	 
 	}
 }
 
@@ -270,8 +271,9 @@ void *degrouper(void *arg)
     int bufferlen;
     int i;
 	//
-	int startOffset, remainderOffset;
+	int startOffset;
 	int changed = 0;
+	int sum;
 
     // return NULL; /* remove this line */
 
@@ -286,55 +288,44 @@ void *degrouper(void *arg)
 
 	/* storing this prevents having to recalculate it in the loop */
 	bufferlen = strlen(buffer);
-	changed = 0;
 
 	/* Step 2: implement degrouper */
 	for (i = 0; i < bufferlen; i++) 
 	{
-		if (buffer[i] == '(')
+		if (buffer[i] =='(' && isNumeric(buffer[i+1]))
 		{
-			startOffset = i;
-			if (!isNumeric(buffer[i + 1]))
-			{
-				continue;
-			}
-
-			do
-			{
-				i++;
-			} while (isNumeric(buffer[i]));
-					
-
-			if (buffer[i] == ')')
-			{
-				remainderOffset = i;
-				char bcloner[1000];
-				strcpy(bcloner, &buffer);
-
-				strcpy(buffer + (startOffset), buffer + (startOffset + 1));
-
-				strcpy(buffer + remainderOffset - 1, buffer + (remainderOffset));
-				bufferlen = bufferlen - 2;
-				changed = 1;
-				num_ops++;
-				i = -1;
-			}
-			else
-			{
-				continue;
-			}
+	    startOffset = i;
+		   do{
+			   i++;
+		   }while(isNumeric(buffer[i]));
 		}
-	}
-			// something missing?
-			/* Step 3: free the lock */
-			pthread_mutex_unlock(&buffer_lock);
+		
+				
+			// remove ')' by shifting the tail end of the expression
+			strcpy(buffer + i, buffer + i + 1);
 
-			/* Step 6: check progress */
-			sem_wait(&progress_lock);
-			progress.group = changed ? 1 : 2; 
-			sem_post(&progress_lock);
-			/* Step 5: let others play */
-			sched_yield();
+			// remove '(' by shifting the beginning of the expression
+			strcpy(buffer + startOffset, buffer + startOffset + 1);
+			// set buffer length and position
+			bufferlen -= 2;
+			i = startOffset;
+            num_ops++;
+			changed = 1;
+		}
+			
+	
+
+	// something missing?
+	/* Step 3: free the lock */
+	pthread_mutex_unlock(&buffer_lock);
+
+	/* Step 6: check progress */
+	sem_wait(&progress_lock);
+	progress.group = changed ? 2 : 1;
+	sem_post(&progress_lock);
+
+	/* Step 5: let others play */
+	sched_yield();
 
     }
 }
@@ -498,8 +489,8 @@ int smp3_main(int argc, char **argv)
     pthread_detach(readerThread);
 	/* Step 1: we have to join on the ________ thread. */
 	// pthread_join(____, NULL);
-
 	pthread_join(sentinelThread, NULL);
+
 
     /* everything is finished, print out the number of operations performed */
     fprintf(stdout, "Performed a total of %d operations\n", num_ops);
