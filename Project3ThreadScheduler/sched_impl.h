@@ -2,23 +2,21 @@
 #define	__SCHED_IMPL__H__
 
 #include <semaphore.h>
-#include <pthread.h>
 #include "list.h"
 
-struct thread_info 
-{
-	/*...Fill this in...*/
-	list_elem_t	*queue_elem;
-	struct sched_queue *queue;
-	sem_t *sem_cpu, *sem_ready;
+struct thread_info {
+        list_t* queue;
+        list_elem_t* queueData;
+        sem_t runWorker;//Semaphore to activate or deactivate worker thread.
+        /*...Fill this in...*/
 };
 
-struct sched_queue 
-{
-	/*...Fill this in...*/
-	list_t *list;
-	sem_t *sem_release, *sem_admit;
-	pthread_mutex_t *access_mutex;
+struct sched_queue {
+        list_elem_t* currentWorker;
+        list_elem_t* nextWorker;
+        //Insert all semaphores for queue here
+        list_t* list;
+        /*...Fill this in...*/
 };
 
 #endif /* __SCHED_IMPL__H__ */
