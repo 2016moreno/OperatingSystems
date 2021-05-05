@@ -164,13 +164,6 @@ static void wait_for_queue(sched_queue_t *queue)
 	sem_post(queue->sem_release);
 }
 
-static void wait_for_queue(sched_queue_t *queue)
-{
-	sem_wait(queue->sem_release);
-	usleep(1000);
-	sem_post(queue->sem_release);
-}
-
 /* You need to statically initialize these structures: */
 sched_impl_t sched_fifo = {
 	{ init_thread_info, destroy_thread_info /*, ...etc... */ }, 
