@@ -166,9 +166,9 @@ static void wait_for_queue(sched_queue_t *queue)
 
 static void wait_for_queue(sched_queue_t *queue)
 {
-	sem_wait(queue->srelease);
+	sem_wait(queue->sem_release);
 	usleep(1000);
-	sem_post(queue->srelease);
+	sem_post(queue->sem_release);
 }
 
 /* You need to statically initialize these structures: */
