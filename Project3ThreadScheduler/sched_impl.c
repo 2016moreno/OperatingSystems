@@ -85,7 +85,7 @@ static void destroy_sched_queue(sched_queue_t *queue)
 
 /*...More functions go here...*/
 
-* Allow a worker thread to execute. */
+/* Allow a worker thread to execute. */
 static void wake_up_worker(thread_info_t *info)
 {
         sem_post(&info->runWorker);
