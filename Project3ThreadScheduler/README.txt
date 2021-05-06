@@ -231,8 +231,8 @@ Q 2  Briefly describe the synchronization constructs you needed to implement
      given time.
 
     Semaphores and mutexes act as stop signs to protect the critical section of a program. (Ex. OpenTDD).
-    Semaphores in this case are used to block threads from entering the full queue, and to block the scheduler when queue is empty.
-    Using both semaphores and mutexes, synchronous threading was achieved to make sure that parts were executing at its given time.
+    thread_lk is used for each thread to indicate when a thread can be executed by having to wait until the schedular unlocks the thread_lk.
+    cpu_lk can be used by either schedular or threads and what is does is make it so the schedular has to wait until a thread releases the cpu_lk.
 
 Q 3  Why is the dummy scheduling implementation provided potentially
      unsafe (i.e. could result in invalid memory references)?  How does
@@ -240,7 +240,7 @@ Q 3  Why is the dummy scheduling implementation provided potentially
 
      Dummy scheduling implemenation is potentially unsafe because it resulted in invalid memory references because memory was not allocated properly.
 
-     Mine makes sure to dynamicallu allocate memory to avoid unsafe behavior.
+     Mine makes sure to dynamically allocate memory to avoid unsafe behavior.
 
 Q 4  When using the FIFO or Round Robin scheduling algorithm, can
      sched_proc() ever "miss" any threads and exit early before all threads
@@ -254,7 +254,7 @@ Q 5  Why are the three variables in scheduler.h declared 'extern'?  What
      if they were not declared without the 'extern' in any file?
 
      An extern variable is one that has been declared but not defined and are able to be accessed anywhere in the program. If not declared 'extern', then we are
-     not able to use them in other files on the same project.  
+     not able to use them in other files on the same project. 
 
 Q 6  Describe the behavior of exit_error() function in scheduler.c.  Why
      does exit_error() not use errno?
@@ -268,22 +268,22 @@ Q 7  Does it matter whether the call to sched_ops->wait_for_queue(queue) in
 
      It does matter because if it returns immediately, scheduler will attempt to 
      schedule a thread without first having any existing in the queue, which conflicts wth other thread processes and
-     performance would suffer.
+     performance wouldn't suffer too much because scheduler will do nothing until there are workers in the queue. 
 
 Q 8  Explain how worker_proc() is able to call the appropriate
      implementation of wait_for_cpu() corresponding to the scheduling policy
      selected by the user on the command line.  Start from main() and
      briefly explain each step along the way.
-
-     main() will call the method create_workers. From there, create_workers will set the values for worker_args_t and call the method
-     worker_proc in threads along with the object parameter of worker_args_t which was just set. worker_proc will then call wait_for_cpu() along with the info
-     of thread in worker_args_t.
+     
+     Once a worker enters the queue, it executes a loop that calls wait_for_cpu(). Then thread has to wait until schedular releases a lock. Schedular will only do this if 
+     it calls next_worker() and wake_up_worker(). Then blocked thread will be unblocked and continue with the loop. Worker then finishes waiting and is stored away for 
+     a bit. Then at the end of an iteration, worker calls release_cpu() to return the resource for schedular and then go on to the next iteration using the same process. 
 
 Q 9  Is it possible that a worker thread would never proceed past the call to
      wa->ops->wait_for_cpu(&wa->info) when using one of the scheduling
      policies implemented in this MP?
 
-     Yes, it is possible.
+     Yes, it is possible that there is a case where a worker can never enter the queue.
 
 Q 10 Explain how you would alter the program to demonstrate the "convoy"
      effect, when a large compute bound job that never yields to another
@@ -296,3 +296,4 @@ Q 10 Explain how you would alter the program to demonstrate the "convoy"
 
      If we slightly alter FIFO, we can have a threshold that a process can maximum stay 'n'
      time units for execution, after that the process must wait again for its turn.
+

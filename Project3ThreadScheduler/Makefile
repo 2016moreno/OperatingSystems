@@ -1,6 +1,6 @@
 CC = gcc
 CCOPTS = -Wall -c -g -ggdb
-LINKOPTS = -Wall -g -ggdb -lpthread
+LINKOPTS = -Wall -g -ggdb -pthread
 
 EXEC=scheduler
 OBJECTS=scheduler.o sched_impl.o list.o dummy_impl.o smp4_tests.o testrunner.o
