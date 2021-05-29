@@ -1,5 +1,6 @@
 /* Project 2 - Multithreaded calculator */
-// Name: 
+// Name: David Moreno
+// Not Working
 
 
 #include "calc.h"
